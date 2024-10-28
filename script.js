@@ -58,7 +58,7 @@ function displayRecipes(recipes) {
 }
 
 async function showRecipeDetails(recipeId) {
-    const apiKey = "088c4ff540064288a1f74e2891dbbeb4"; // Your new API key
+    const apiKey = "9fb280c96b8849d78e9a0cffb666120f"; // Your new API key
     const detailsUrl = `https://api.spoonacular.com/recipes/${recipeId}/information?apiKey=${apiKey}`;
 
     try {
