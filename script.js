@@ -1,6 +1,6 @@
 async function searchRecipes() {
     const query = document.getElementById("search").value;
-    const apiKey = "088c4ff540064288a1f74e2891dbbeb4"; // Your API key
+    const apiKey = "088c4ff540064288a1f74e2891dbbeb4"; // Your new API key
     const apiUrl = `https://api.spoonacular.com/recipes/complexSearch?query=${query}&apiKey=${apiKey}`;
 
     if (!query) {
@@ -11,7 +11,7 @@ async function searchRecipes() {
     try {
         const response = await fetch(apiUrl);
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`HTTP error! status: ${response.status}`); // Capture HTTP errors
         }
 
         const data = await response.json();
@@ -27,8 +27,8 @@ async function searchRecipes() {
 
         displayRecipes(recipesWithDetails);
     } catch (error) {
-        console.error("Error fetching recipes:", error);
-        document.getElementById("recipe-list").innerHTML = "<p>Error fetching recipes. Please try again later.</p>";
+        console.error("Error fetching recipes:", error); // Log error details
+        document.getElementById("recipe-list").innerHTML = `<p>Error fetching recipes: ${error.message}. Please try again later.</p>`;
     }
 }
 
@@ -36,7 +36,7 @@ async function fetchRecipeDetails(recipeId, apiKey) {
     const detailsUrl = `https://api.spoonacular.com/recipes/${recipeId}/information?apiKey=${apiKey}`;
     const response = await fetch(detailsUrl);
     if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP error! status: ${response.status}`); // Capture HTTP errors
     }
     return await response.json();
 }
@@ -49,30 +49,39 @@ function displayRecipes(recipes) {
         const recipeDiv = document.createElement("div");
         recipeDiv.classList.add("recipe");
 
-        const ingredientsDiv = document.createElement("div");
-        ingredientsDiv.classList.add("ingredients");
-        const ingredients = recipe.extendedIngredients.map(ingredient => ingredient.original).join(', ');
-        ingredientsDiv.innerHTML = `<p><strong>Ingredients:</strong> ${ingredients}</p>`;
-
-        const instructionsDiv = document.createElement("div");
-        instructionsDiv.classList.add("instructions");
-        instructionsDiv.innerHTML = `<p><strong>Instructions:</strong> ${recipe.instructions}</p>`;
-
         recipeDiv.innerHTML = `
-            <img src="${recipe.image}" alt="${recipe.title}">
+            <img src="${recipe.image}" alt="${recipe.title}" onclick="showRecipeDetails(${recipe.id})">
             <h3>${recipe.title}</h3>
         `;
-
-        recipeDiv.appendChild(ingredientsDiv);
-        recipeDiv.appendChild(instructionsDiv);
-
-        recipeDiv.querySelector("img").addEventListener("click", () => {
-            const currentIngredientsDisplay = ingredientsDiv.style.display;
-            const currentInstructionsDisplay = instructionsDiv.style.display;
-            ingredientsDiv.style.display = currentIngredientsDisplay === "none" || currentIngredientsDisplay === "" ? "block" : "none";
-            instructionsDiv.style.display = currentInstructionsDisplay === "none" || currentInstructionsDisplay === "" ? "block" : "none";
-        });
-
         recipeList.appendChild(recipeDiv);
     });
+}
+
+async function showRecipeDetails(recipeId) {
+    const apiKey = "088c4ff540064288a1f74e2891dbbeb4"; // Your new API key
+    const detailsUrl = `https://api.spoonacular.com/recipes/${recipeId}/information?apiKey=${apiKey}`;
+
+    try {
+        const response = await fetch(detailsUrl);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const recipe = await response.json();
+        const recipeDetails = `
+            <h3>${recipe.title}</h3>
+            <img src="${recipe.image}" alt="${recipe.title}">
+            <h4>Ingredients:</h4>
+            <ul class="ingredients">
+                ${recipe.extendedIngredients.map(ingredient => `<li>${ingredient.original}</li>`).join('')}
+            </ul>
+            <h4>Instructions:</h4>
+            <p>${recipe.instructions}</p>
+        `;
+
+        const recipeList = document.getElementById("recipe-list");
+        recipeList.innerHTML = recipeDetails; // Display recipe details in the same area
+    } catch (error) {
+        console.error("Error fetching recipe details:", error);
+    }
 }
