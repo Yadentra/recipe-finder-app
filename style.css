@@ -66,4 +66,13 @@ button:hover {
     margin-top: 10px;
     color: #555;
     font-size: 14px;
+    display: none;
+}
+
+.instructions {
+    text-align: left;
+    margin-top: 10px;
+    color: #555;
+    font-size: 14px;
+    display: none; /* Initially hide instructions */
 }
