@@ -54,8 +54,7 @@ async function showIngredients(recipeId) {
         `;
 
         const recipeList = document.getElementById("recipe-list");
-        recipeList.innerHTML = ""; // Clear previous results
-        recipeList.appendChild(ingredientsDiv); // Show ingredients
+        recipeList.appendChild(ingredientsDiv);
     } catch (error) {
         console.error("Error fetching ingredients:", error);
         alert("An error occurred while fetching ingredients. Please try again.");
