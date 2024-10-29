@@ -64,7 +64,9 @@ async function showRecipeDetails(recipeId) {
             <img src="${recipe.image}" alt="${recipe.title}">
             <h4>Ingredients:</h4>
             <ul class="ingredients">
-                ${recipe.extendedIngredients.map(ingredient => `<li>${ingredient.original}</li>`).join('')}
+                ${recipe.extendedIngredients.length > 0 ? 
+                    recipe.extendedIngredients.map(ingredient => `<li>${ingredient.original}</li>`).join('') : 
+                    "<li>No ingredients available.</li>"}
             </ul>
             <h4>Instructions:</h4>
             <p>${recipe.instructions || "No instructions available."}</p>
