@@ -1,87 +1,66 @@
 async function searchRecipes() {
     const query = document.getElementById("search").value;
-    const apiKey = "088c4ff540064288a1f74e2891dbbeb4"; // Your new API key
-    const apiUrl = `https://api.spoonacular.com/recipes/complexSearch?query=${query}&apiKey=${apiKey}`;
-
-    if (!query) {
-        alert("Please enter a search term.");
-        return;
-    }
+    const appId = "55b9bb9c"; // Your Edamam app ID
+    const apiKey = "1f2603efa919c869538d09f497c677b6"; // Your Edamam API key
+    const apiUrl = `https://api.edamam.com/search?q=${query}&app_id=${appId}&app_key=${apiKey}`;
 
     try {
         const response = await fetch(apiUrl);
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`); // Capture HTTP errors
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const data = await response.json();
-        const recipes = data.results;
-
-        if (recipes.length === 0) {
-            document.getElementById("recipe-list").innerHTML = "<p>No recipes found.</p>";
-            return;
-        }
-
-        const recipeDetailsPromises = recipes.map(recipe => fetchRecipeDetails(recipe.id, apiKey));
-        const recipesWithDetails = await Promise.all(recipeDetailsPromises);
-
-        displayRecipes(recipesWithDetails);
+        displayRecipes(data.hits);
     } catch (error) {
-        console.error("Error fetching recipes:", error); // Log error details
-        document.getElementById("recipe-list").innerHTML = `<p>Error fetching recipes: ${error.message}. Please try again later.</p>`;
+        console.error("Error fetching recipes:", error);
+        alert("An error occurred while fetching recipes. Please try again.");
     }
-}
-
-async function fetchRecipeDetails(recipeId, apiKey) {
-    const detailsUrl = `https://api.spoonacular.com/recipes/${recipeId}/information?apiKey=${apiKey}`;
-    const response = await fetch(detailsUrl);
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`); // Capture HTTP errors
-    }
-    return await response.json();
 }
 
 function displayRecipes(recipes) {
     const recipeList = document.getElementById("recipe-list");
     recipeList.innerHTML = "";
 
-    recipes.forEach(recipe => {
+    recipes.forEach(recipeData => {
+        const recipe = recipeData.recipe;
         const recipeDiv = document.createElement("div");
         recipeDiv.classList.add("recipe");
 
         recipeDiv.innerHTML = `
-            <img src="${recipe.image}" alt="${recipe.title}" onclick="showRecipeDetails(${recipe.id})">
-            <h3>${recipe.title}</h3>
+            <img src="${recipe.image}" alt="${recipe.label}" onclick="showIngredients('${recipe.uri}')">
+            <h3>${recipe.label}</h3>
         `;
         recipeList.appendChild(recipeDiv);
     });
 }
 
-async function showRecipeDetails(recipeId) {
-    const apiKey = "088c4ff540064288a1f74e2891dbbeb4"; // Your new API key
-    const detailsUrl = `https://api.spoonacular.com/recipes/${recipeId}/information?apiKey=${apiKey}`;
+async function showIngredients(recipeUri) {
+    const encodedUri = encodeURIComponent(recipeUri);
+    const appId = "55b9bb9c";
+    const apiKey = "1f2603efa919c869538d09f497c677b6";
+    const apiUrl = `https://api.edamam.com/api/recipes/v2/${encodedUri}?type=public&app_id=${appId}&app_key=${apiKey}`;
 
     try {
-        const response = await fetch(detailsUrl);
+        const response = await fetch(apiUrl);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const recipe = await response.json();
-        const recipeDetails = `
-            <h3>${recipe.title}</h3>
-            <img src="${recipe.image}" alt="${recipe.title}">
+        const data = await response.json();
+        const ingredients = data.recipe.ingredientLines;
+
+        const ingredientsDiv = document.createElement("div");
+        ingredientsDiv.classList.add("ingredients");
+        ingredientsDiv.innerHTML = `
             <h4>Ingredients:</h4>
-            <ul class="ingredients">
-                ${recipe.extendedIngredients.map(ingredient => `<li>${ingredient.original}</li>`).join('')}
-            </ul>
-            <h4>Instructions:</h4>
-            <p>${recipe.instructions}</p>
+            <ul>${ingredients.map(item => `<li>${item}</li>`).join('')}</ul>
         `;
 
         const recipeList = document.getElementById("recipe-list");
-        recipeList.innerHTML = recipeDetails; // Display recipe details in the same area
+        recipeList.appendChild(ingredientsDiv);
     } catch (error) {
-        console.error("Error fetching recipe details:", error);
+        console.error("Error fetching ingredients:", error);
+        alert("An error occurred while fetching ingredients. Please try again.");
     }
 }
