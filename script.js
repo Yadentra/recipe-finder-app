@@ -29,6 +29,17 @@ async function searchRecipes() {
     }
 }
 
+async function fetchRecipeDetails(recipeId) {
+    const apiKey = "9787f830694d4dc59ab410ac7d6c77b3"; 
+    const detailsUrl = `https://api.spoonacular.com/recipes/${recipeId}/information?apiKey=${apiKey}`;
+
+    const response = await fetch(detailsUrl);
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+}
+
 function displayRecipes(recipes) {
     const recipeList = document.getElementById("recipe-list");
     recipeList.innerHTML = "";
@@ -38,7 +49,7 @@ function displayRecipes(recipes) {
         recipeDiv.classList.add("recipe");
 
         recipeDiv.innerHTML = `
-            <img src="${recipe.image}" alt="${recipe.title}" onclick="showRecipeDetails(${recipe.id})">
+            <img src="${recipe.image}" alt="${recipe.title}" onclick="showRecipeDetails(${recipe.id})" style="cursor:pointer;">
             <h3>${recipe.title}</h3>
         `;
         recipeList.appendChild(recipeDiv);
@@ -46,17 +57,8 @@ function displayRecipes(recipes) {
 }
 
 async function showRecipeDetails(recipeId) {
-    const apiKey = "9787f830694d4dc59ab410ac7d6c77b3";
-    const detailsUrl = `https://api.spoonacular.com/recipes/${recipeId}/information?apiKey=${apiKey}`;
-
     try {
-        const response = await fetch(detailsUrl);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const recipe = await response.json();
-        
+        const recipe = await fetchRecipeDetails(recipeId);
         const recipeDetails = `
             <h3>${recipe.title}</h3>
             <img src="${recipe.image}" alt="${recipe.title}">
@@ -78,5 +80,6 @@ async function showRecipeDetails(recipeId) {
 }
 
 function goBackToList() {
-    searchRecipes();
+    document.getElementById("recipe-list").innerHTML = ""; // Clear the current details
+    document.getElementById("search").value = ""; // Clear the search input
 }
