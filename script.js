@@ -1,8 +1,7 @@
 async function searchRecipes() {
     const query = document.getElementById("search").value;
-    const appId = "55b9bb9c"; // Your Edamam app ID
-    const apiKey = "1f2603efa919c869538d09f497c677b6"; // Your Edamam API key
-    const apiUrl = `https://api.edamam.com/search?q=${query}&app_id=${appId}&app_key=${apiKey}`;
+    const apiKey = "9787f830694d4dc59ab410ac7d6c77b3";
+    const apiUrl = `https://api.spoonacular.com/recipes/complexSearch?query=${query}&apiKey=${apiKey}&number=10`;
 
     try {
         const response = await fetch(apiUrl);
@@ -11,7 +10,7 @@ async function searchRecipes() {
         }
 
         const data = await response.json();
-        displayRecipes(data.hits);
+        displayRecipes(data.results);
     } catch (error) {
         console.error("Error fetching recipes:", error);
         alert("An error occurred while fetching recipes. Please try again.");
@@ -22,24 +21,21 @@ function displayRecipes(recipes) {
     const recipeList = document.getElementById("recipe-list");
     recipeList.innerHTML = "";
 
-    recipes.forEach(recipeData => {
-        const recipe = recipeData.recipe;
+    recipes.forEach(recipe => {
         const recipeDiv = document.createElement("div");
         recipeDiv.classList.add("recipe");
 
         recipeDiv.innerHTML = `
-            <img src="${recipe.image}" alt="${recipe.label}" onclick="showIngredients('${recipe.uri}')">
-            <h3>${recipe.label}</h3>
+            <img src="${recipe.image}" alt="${recipe.title}" onclick="showIngredients(${recipe.id})">
+            <h3>${recipe.title}</h3>
         `;
         recipeList.appendChild(recipeDiv);
     });
 }
 
-async function showIngredients(recipeUri) {
-    const encodedUri = encodeURIComponent(recipeUri);
-    const appId = "55b9bb9c";
-    const apiKey = "1f2603efa919c869538d09f497c677b6";
-    const apiUrl = `https://api.edamam.com/api/recipes/v2/${encodedUri}?type=public&app_id=${appId}&app_key=${apiKey}`;
+async function showIngredients(recipeId) {
+    const apiKey = "9787f830694d4dc59ab410ac7d6c77b3";
+    const apiUrl = `https://api.spoonacular.com/recipes/${recipeId}/information?apiKey=${apiKey}`;
 
     try {
         const response = await fetch(apiUrl);
@@ -48,17 +44,18 @@ async function showIngredients(recipeUri) {
         }
 
         const data = await response.json();
-        const ingredients = data.recipe.ingredientLines;
+        const ingredients = data.extendedIngredients.map(ing => ing.original);
 
         const ingredientsDiv = document.createElement("div");
         ingredientsDiv.classList.add("ingredients");
         ingredientsDiv.innerHTML = `
-            <h4>Ingredients:</h4>
+            <h4>Ingredients for ${data.title}:</h4>
             <ul>${ingredients.map(item => `<li>${item}</li>`).join('')}</ul>
         `;
 
         const recipeList = document.getElementById("recipe-list");
-        recipeList.appendChild(ingredientsDiv);
+        recipeList.innerHTML = ""; // Clear previous results
+        recipeList.appendChild(ingredientsDiv); // Show ingredients
     } catch (error) {
         console.error("Error fetching ingredients:", error);
         alert("An error occurred while fetching ingredients. Please try again.");
