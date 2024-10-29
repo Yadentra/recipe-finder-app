@@ -1,6 +1,6 @@
 async function searchRecipes() {
     const query = document.getElementById("search").value;
-    const apiKey = "9787f830694d4dc59ab410ac7d6c77b3"; // Your new API key
+    const apiKey = "9787f830694d4dc59ab410ac7d6c77b3"; 
     const apiUrl = `https://api.spoonacular.com/recipes/complexSearch?query=${query}&apiKey=${apiKey}`;
 
     if (!query) {
@@ -11,7 +11,7 @@ async function searchRecipes() {
     try {
         const response = await fetch(apiUrl);
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`); // Capture HTTP errors
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const data = await response.json();
@@ -22,23 +22,11 @@ async function searchRecipes() {
             return;
         }
 
-        const recipeDetailsPromises = recipes.map(recipe => fetchRecipeDetails(recipe.id, apiKey));
-        const recipesWithDetails = await Promise.all(recipeDetailsPromises);
-
-        displayRecipes(recipesWithDetails);
+        displayRecipes(recipes);
     } catch (error) {
-        console.error("Error fetching recipes:", error); // Log error details
+        console.error("Error fetching recipes:", error);
         document.getElementById("recipe-list").innerHTML = `<p>Error fetching recipes: ${error.message}. Please try again later.</p>`;
     }
-}
-
-async function fetchRecipeDetails(recipeId, apiKey) {
-    const detailsUrl = `https://api.spoonacular.com/recipes/${recipeId}/information?apiKey=${apiKey}`;
-    const response = await fetch(detailsUrl);
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`); // Capture HTTP errors
-    }
-    return await response.json();
 }
 
 function displayRecipes(recipes) {
@@ -58,7 +46,7 @@ function displayRecipes(recipes) {
 }
 
 async function showRecipeDetails(recipeId) {
-    const apiKey = "9787f830694d4dc59ab410ac7d6c77b3"; // Your new API key
+    const apiKey = "9787f830694d4dc59ab410ac7d6c77b3";
     const detailsUrl = `https://api.spoonacular.com/recipes/${recipeId}/information?apiKey=${apiKey}`;
 
     try {
@@ -68,6 +56,7 @@ async function showRecipeDetails(recipeId) {
         }
 
         const recipe = await response.json();
+        
         const recipeDetails = `
             <h3>${recipe.title}</h3>
             <img src="${recipe.image}" alt="${recipe.title}">
@@ -76,12 +65,18 @@ async function showRecipeDetails(recipeId) {
                 ${recipe.extendedIngredients.map(ingredient => `<li>${ingredient.original}</li>`).join('')}
             </ul>
             <h4>Instructions:</h4>
-            <p>${recipe.instructions}</p>
+            <p>${recipe.instructions || "No instructions available."}</p>
+            <button onclick="goBackToList()">Back to recipes</button>
         `;
 
         const recipeList = document.getElementById("recipe-list");
-        recipeList.innerHTML = recipeDetails; // Display recipe details in the same area
+        recipeList.innerHTML = recipeDetails; 
     } catch (error) {
         console.error("Error fetching recipe details:", error);
+        alert("An error occurred while fetching recipe details. Please try again.");
     }
+}
+
+function goBackToList() {
+    searchRecipes();
 }
