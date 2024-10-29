@@ -53,6 +53,7 @@ async function showIngredients(recipeId) {
             <ul>${ingredients.map(item => `<li>${item}</li>`).join('')}</ul>
         `;
 
+        // Append the ingredientsDiv to the recipe list
         const recipeList = document.getElementById("recipe-list");
         recipeList.appendChild(ingredientsDiv);
     } catch (error) {
